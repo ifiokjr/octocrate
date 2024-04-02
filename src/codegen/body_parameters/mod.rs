@@ -4,7 +4,7 @@ use std::ops::Deref;
 
 use super::{
   function_name::FunctionName,
-  structs::{Struct, StructField},
+  parsed::structs::{Struct, StructField},
 };
 use crate::schema::body_parameters::BodyParameter;
 use generated_struct::GeneratedStruct;
@@ -19,7 +19,7 @@ impl BodyParameters {
     Self { body_parameters }
   }
 
-  pub fn generate_struct(&self, title: &String) -> Option<Struct> {
+  pub fn parse(&self, title: &String) -> Option<Struct> {
     if self.body_parameters.is_empty() {
       return None;
     }

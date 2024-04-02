@@ -1,4 +1,4 @@
-use super::super::structs::Struct;
+use super::super::parsed::structs::Struct;
 use crate::schema::body_parameters::BodyParameterType;
 
 pub enum GeneratedStruct {
@@ -28,11 +28,11 @@ impl GeneratedStruct {
           BodyParameterType::Array => format!("Vec<{}>", type_name),
           BodyParameterType::ObjectOrNull => format!("Option<{}>", type_name),
           BodyParameterType::ArrayOfObjects => format!("Vec<{}>", type_name),
+          BodyParameterType::ArrayOfObjectsOrNull => format!("Option<Vec<{}>>", type_name),
           _ => {
             unreachable!(
-              "This type is not implemented: {:?} for struct: {:?}",
-              type_,
-              struct_.name.to_string()
+              "This type is not implemented: {:?} for struct: {:#?}",
+              type_, struct_
             )
           }
         }
@@ -48,9 +48,13 @@ impl GeneratedStruct {
         BodyParameterType::IntegerOrNull => "Option<i64>".to_string(),
         BodyParameterType::ArrayOfStrings => "Vec<String>".to_string(),
         BodyParameterType::ArrayOfIntegers => "Vec<i64>".to_string(),
-        BodyParameterType::StringOrNumber => "String".to_string(),
-        BodyParameterType::StringOrInteger => "String".to_string(),
-        BodyParameterType::BooleanOrString => "String".to_string(),
+        BodyParameterType::Array => "Vec<serde_json::Value>".to_string(),
+        BodyParameterType::StringOrNumber => "StringOrNumber".to_string(),
+        BodyParameterType::StringOrInteger => "StringOrNumber".to_string(),
+        BodyParameterType::BooleanOrString => "StringOrBool".to_string(),
+        BodyParameterType::ObjectOrNull => "Option<serde_json::Value>".to_string(),
+        BodyParameterType::ObjectOrString => "serde_json::Value".to_string(),
+        BodyParameterType::Object => "serde_json::Value".to_string(),
         BodyParameterType::ArrayOfStringsOrNull => "Option<Vec<String>>".to_string(),
         // TODO: StringOrNumber
         BodyParameterType::NullOrStringOrInteger => "Option<serde_json::Value>".to_string(),

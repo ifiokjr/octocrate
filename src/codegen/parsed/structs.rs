@@ -1,7 +1,9 @@
 use regex::Regex;
-use std::{fmt::Debug, ops::Deref, sync::Arc};
+use std::{any::Any, fmt::Debug, ops::Deref, sync::Arc};
 
-pub trait Referable: Debug {}
+pub trait Referable: Debug {
+  fn as_any(&self) -> &dyn Any;
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Description(String);
@@ -33,6 +35,7 @@ pub struct EnumField {
   pub type_name: Option<String>,
   pub description: Option<Description>,
   pub reference: Option<Arc<Box<dyn Referable>>>,
+  // pub rename_case: Option<String>,
 }
 
 #[derive(Clone, Debug)]
@@ -158,10 +161,16 @@ impl From<&String> for Description {
 
 impl From<&String> for StructName {
   fn from(name: &String) -> Self {
+    let regexp = r#"\s"#;
+
+    let re = Regex::new(regexp).unwrap();
+
+    let replaced = re.replace_all(&name, "_");
+
     let mut pascal = String::new();
     let mut capitalize = true;
 
-    for ch in name.chars() {
+    for ch in replaced.chars() {
       if ch == '_' {
         capitalize = true;
       } else if capitalize {
@@ -192,9 +201,17 @@ impl Deref for Description {
   }
 }
 
-impl Referable for Struct {}
+impl Referable for Struct {
+  fn as_any(&self) -> &dyn Any {
+    self
+  }
+}
 
-impl Referable for Enum {}
+impl Referable for Enum {
+  fn as_any(&self) -> &dyn Any {
+    self
+  }
+}
 
 #[cfg(test)]
 mod tests {

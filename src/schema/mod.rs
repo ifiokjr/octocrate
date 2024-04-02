@@ -20,6 +20,6 @@ mod tests {
 
     let commits = source.get("commits").unwrap();
 
-    let commits = commits.get("commits").unwrap();
+    let _commits = commits.get("commits").unwrap();
   }
 }

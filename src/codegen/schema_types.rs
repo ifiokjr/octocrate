@@ -1,4 +1,4 @@
-use crate::schema::schema::{Schema, SchemaType, SchemaTypeDefination};
+use crate::schema::schema::{SchemaType, SchemaTypeDefination};
 
 pub struct SchemaTypes {
   pub types: Vec<SchemaType>,
@@ -16,7 +16,7 @@ impl SchemaTypes {
     let is_array = types.contains(&SchemaType::Array);
     let is_object = types.contains(&SchemaType::Object);
     let is_string = types.contains(&SchemaType::String);
-    let is_integer = types.contains(&SchemaType::Integer);
+    let is_integer = types.contains(&SchemaType::Integer) || types.contains(&SchemaType::Number);
     let is_boolean = types.contains(&SchemaType::Boolean);
 
     SchemaTypes {
@@ -46,6 +46,10 @@ impl SchemaTypes {
       (false, false, true, false, false) => "i64".into(),
       // [integer, null]
       (false, false, true, true, false) => "Option<i64>".into(),
+      // [array, string]
+      (true, true, false, false, false) => "Vec<String>".into(),
+      // [array]
+      (true, false, false, false, false) => "Vec<serde_json::Value>".into(),
       // [boolean]
       (false, false, false, false, true) => "bool".into(),
       // [boolean, null]
@@ -53,6 +57,14 @@ impl SchemaTypes {
       // [boolean, string]
       // TODO: BooleanOrString
       (false, true, false, false, true) => "StringOrBool".into(),
+      // [string, integer]
+      // TODO: StringOrNumber
+      (false, true, true, false, false) => "StringOrNumber".into(),
+      // [null]
+      (false, false, false, true, false) => "Null".into(),
+      // []
+      // TODO: Why is this here?
+      (false, false, false, false, false) => "Null".into(),
       _ => {
         unreachable!(
           "Invalid schema types: array: {}, string: {}, integer: {}, null: {}, boolean: {}",
@@ -110,7 +122,8 @@ impl SchemaTypes {
     self.is_array = self.types.contains(&SchemaType::Array);
     self.is_object = self.types.contains(&SchemaType::Object);
     self.is_string = self.types.contains(&SchemaType::String);
-    self.is_integer = self.types.contains(&SchemaType::Integer);
+    self.is_integer =
+      self.types.contains(&SchemaType::Integer) || self.types.contains(&SchemaType::Number);
     self.is_boolean = self.types.contains(&SchemaType::Boolean);
   }
 }

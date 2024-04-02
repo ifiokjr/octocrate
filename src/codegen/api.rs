@@ -1,7 +1,4 @@
-use super::{
-  body_parameters::BodyParameters, parameters::Parameters, schema_parser::ParsedStruct,
-  structs::Struct,
-};
+use super::{body_parameters::BodyParameters, parameters::Parameters, parsed::structs::Struct};
 use crate::schema::{
   api::{APISchema, Method},
   response::Response,
@@ -35,7 +32,7 @@ impl From<APISchema> for API {
 
     let body_parameters = BodyParameters::new(api_schema.body_parameters);
 
-    let body = body_parameters.generate_struct(&api_schema.title);
+    let body = body_parameters.parse(&api_schema.title);
 
     API {
       name: api_schema.title,

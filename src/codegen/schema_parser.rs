@@ -1,19 +1,12 @@
 use super::{
-  schema_types::SchemaTypes,
-  structs::{Enum, EnumField, Referable, Struct, StructName},
-};
-use crate::{codegen::structs::StructField, schema::schema::Schema};
-use std::sync::Arc;
-
-#[derive(Debug)]
-pub enum ParsedStruct {
-  Struct(Struct),
-  Enum(Enum),
-  Type {
-    type_name: String,
-    reference: Option<Arc<Box<dyn Referable>>>,
+  parsed::{
+    structs::{Enum, EnumField, Referable, Struct, StructField, StructName},
+    ParsedStruct,
   },
-}
+  schema_types::SchemaTypes,
+};
+use crate::schema::schema::Schema;
+use std::sync::Arc;
 
 pub struct SchemaParser {
   prefixs: Vec<String>,
@@ -327,14 +320,9 @@ impl SchemaParser {
     if let Some(enum_values) = &schema.enum_ {
       for enum_value in enum_values {
         if let Some(enum_value) = &enum_value {
-          if enum_value == "null" {
-            is_optional = true;
-            continue;
-          }
-
-          let mut enum_field = EnumField::new(enum_value.to_string());
           let enum_value = StructName::from(enum_value);
-          enum_field.set_type_name(enum_value.to_string());
+          let enum_field = EnumField::new(enum_value.to_string());
+          // enum_field.set_type_name(enum_value.to_string());
 
           enum_.add_field(enum_field);
         } else {
@@ -591,7 +579,7 @@ mod schema_tests {
           "enum": [
             "open",
             "closed",
-            "null"
+            null
           ]
         }
       }
@@ -601,8 +589,56 @@ mod schema_tests {
 
     let mut parser = SchemaParser::new();
 
-    let _generated = parser.parse(&"Response".to_string(), &schema);
+    let generated = parser.parse(&"Response".to_string(), &schema);
 
-    // println!("{:#?}", generated);
+    if let ParsedStruct::Struct(struct_) = generated {
+      assert_eq!(struct_.name.to_string(), "Response");
+      assert_eq!(struct_.fields.len(), 1);
+
+      let field = &struct_.fields[0];
+      assert_eq!(field.name, "state");
+      assert_eq!(field.type_name, "Option<ResponseState>");
+
+      let reference = &field.reference.as_ref().unwrap();
+      let response_state = reference.as_any().downcast_ref::<Enum>().unwrap();
+
+      assert_eq!(response_state.name.to_string(), "ResponseState");
+
+      let enum_field = &response_state.fields[0];
+
+      assert_eq!(enum_field.name, "Open");
+      assert_eq!(enum_field.type_name, None);
+
+      let enum_field = &response_state.fields[1];
+
+      assert_eq!(enum_field.name, "Closed");
+      assert_eq!(enum_field.type_name, None);
+    } else {
+      panic!("Expected struct");
+    }
+  }
+
+  #[test]
+  fn test_schema_parser_with_string() {
+    let json = r#"{
+      "type": "string"
+    }"#;
+
+    let schema: Schema = serde_json::from_str(json).unwrap();
+
+    let mut parser = SchemaParser::new();
+
+    let generated = parser.parse(&"Response".to_string(), &schema);
+
+    if let ParsedStruct::Type {
+      type_name,
+      reference,
+    } = generated
+    {
+      assert_eq!(type_name, "String");
+      assert!(reference.is_none());
+    } else {
+      panic!("Expected struct");
+    }
   }
 }

@@ -5,6 +5,7 @@ use std::collections::BTreeMap;
 pub enum SchemaType {
   Null,
   Integer,
+  Number,
   Boolean,
   String,
   Object,
@@ -47,6 +48,7 @@ impl TryFrom<&String> for SchemaType {
     match value.as_str() {
       "null" => Ok(SchemaType::Null),
       "integer" => Ok(SchemaType::Integer),
+      "number" => Ok(SchemaType::Number),
       "string" => Ok(SchemaType::String),
       "object" => Ok(SchemaType::Object),
       "array" => Ok(SchemaType::Array),
@@ -65,6 +67,7 @@ impl ToString for SchemaType {
       SchemaType::Object => "object".to_string(),
       SchemaType::Array => "array".to_string(),
       SchemaType::Boolean => "boolean".to_string(),
+      SchemaType::Number => "number".to_string(),
     }
   }
 }

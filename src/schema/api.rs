@@ -33,3 +33,15 @@ pub struct APISchema {
   #[serde(rename = "codeExamples")]
   pub code_examples: Vec<APICodeExampleSchema>,
 }
+
+impl ToString for Method {
+  fn to_string(&self) -> String {
+    match &self {
+      Method::GET => "GET".to_string(),
+      Method::POST => "POST".to_string(),
+      Method::PUT => "PUT".to_string(),
+      Method::PATCH => "PATCH".to_string(),
+      Method::DELETE => "DELETE".to_string(),
+    }
+  }
+}
