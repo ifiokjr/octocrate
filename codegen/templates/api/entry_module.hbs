@@ -17,7 +17,7 @@ impl GitHubAPI {
     Self {
       {{#each modules }}
       #[cfg(any(feature = "full", feature = "{{ file_name }}"))]
-      {{ file_name }}: {{ file_name }}::GitHub{{ module_name }}API::new(&config),
+      {{ file_name }}: {{ file_name }}::GitHub{{ module_name }}API::new(config),
       {{/each}}
     }
   }
